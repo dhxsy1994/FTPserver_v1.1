@@ -68,7 +68,6 @@ void hand_request(int fd){
 			len = strlen(buf)-8;
 			strncpy(path,buf+7,len);
 			order_remove(fd,path);
-			printf("remove\n");
 		}
 		if(0 == strncmp(buf,"pwd",3))
 		{
