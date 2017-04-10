@@ -47,3 +47,4 @@ int order_cd(int sfd,char* path);
 int order_remove(int sfd,char* filename);
 int send_file(int sfd,char* filename);
 int order_gets(int sfd,char* filename);
+int order_puts(int sfd,char* filename);

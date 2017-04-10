@@ -49,6 +49,11 @@ void hand_request(int fd){
 		if(0 == strncmp(buf,"puts",4))
 		{
 			printf("puts\n");
+			len = strlen(buf)-6;
+			strncpy(path,buf+5,len);
+			printf("%s\n",path);
+			order_puts(fd,path);
+
 		}
 		if(0 == strncmp(buf,"gets",4))
 		{
