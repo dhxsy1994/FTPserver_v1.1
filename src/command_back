@@ -1,0 +1,112 @@
+#include "fun.h"
+
+int get_pwd(int sfd)
+{
+	train t;
+	bzero(&t,sizeof(t));
+	getcwd(t.buf,sizeof(t.buf));
+	t.len = strlen(t.buf);
+
+	int ret = send(sfd,&t,4+t.len,0);
+	if(-1 == ret)
+	{
+		perror("send");
+		return -1;
+	}
+	printf("%s\n",t.buf);
+	return 0;
+}
+
+int get_ls(int sfd,char* path)
+{
+	train t;
+	DIR *dir;
+	dir = opendir(path);
+	if(NULL == dir)
+	{
+		perror("opendir");
+		return -1;
+	}
+	struct dirent *p;
+	int ret;
+	struct stat buf;
+	char time[35] = {0};
+	char buf_size[30] = {0};
+	int len;
+	bzero(&t,sizeof(t));
+	while((p = readdir(dir))!= NULL)
+	{	
+		ret = stat(p->d_name,&buf);
+		if(0 != ret)
+		{
+			perror("stat");
+			return -1;
+		}
+		int mode;
+		mode = buf.st_mode;
+		if(p->d_type == 4)
+		{
+			strcat(t.buf,"d");
+		}else{
+			strcat(t.buf,"-");
+		}
+		strncat(t.buf,"                        ",5);
+		//sprintf(buf_size,"%ld",buf.st_size);
+		//strcat(t.buf,buf_size);
+		//strncat(t.buf,"                        ",5);
+		
+	//		for(int i=4 ; i<=15;i++)
+//		{
+//			strcat(t.buf,&time[i]);
+//		}
+		strcat(t.buf,p->d_name);	
+		strncat(t.buf,"                        ",5);
+		strcpy(time,ctime(&buf.st_mtime));
+		len = strlen(time);
+		strncat(t.buf,time,len-1);	
+		strncat(t.buf,"                        ",5);
+		sprintf(buf_size,"%ld",buf.st_size);
+		strcat(t.buf,buf_size);
+
+		strcat(t.buf,"\n");
+	}
+	printf("%s",t.buf);
+	t.len = strlen(t.buf);
+	ret = send_n(sfd,&t,t.len);
+	if(ret == -1)
+	{
+		printf("error send\n");
+	}else{
+		printf("success send\n");
+	}
+	closedir(dir);
+	return 0;
+}
+
+
+int order_cd(int sfd,char* path)
+{
+	int len;
+	int ret;	
+	printf("%s",path);
+	ret=chdir(path);
+	if(-1 == ret)
+	{
+		perror("chdir");
+		send(sfd,"no dir\n",7,0);
+		return -1;
+	}else{
+		printf("chdir success\n");
+		send(sfd,"ch ok\n",5,0);
+		return 0;
+	}
+	
+	return 0;		
+}
+
+//int order_remove(int sfd,char* name)
+//{
+	
+//}
+
+
